@@ -5,9 +5,9 @@
 1.  [Введение](#введение)
 2.  [Архитектура приложения](#архитектура-приложения)
 3.  [Описание API Endpoints](#описание-api-endpoints)
-    *   [POST /api/register/ (User Registration)](#post-apiregister-user-registration)
-    *   [GET /api/wallets/{WALLET_UUID}/ (Wallet Detail)](#get-apiwalletswallet_uuid-wallet-detail)
-    *   [POST /api/wallets/{WALLET_UUID}/operation/ (Wallet Operation)](#post-apiwalletswallet_uuidoperation-wallet-operation)
+    *   [POST /api/v1/register/ (User Registration)](#post-apiv1register-user-registration)
+    *   [GET /api/v1/wallets/{WALLET_UUID}/ (Wallet Detail)](#get-apiv1walletswallet_uuid-wallet-detail)
+    *   [POST /api/v1/wallets/{WALLET_UUID}/operation/ (Wallet Operation)](#post-apiv1walletswallet_uuidoperation-wallet-operation)
 4.  [Модели данных](#модели-данных)
     *   [UserRegistrationSerializer](#userregistrationserializer)
     *   [WalletSerializer](#walletserializer)
@@ -37,7 +37,7 @@
     *   **Django REST Framework (Backend API):**
         > Является основным фреймворком бэкенда, отвечающим за создание и управление RESTful API endpoints. Django REST Framework обеспечивает:
         >
-        > *   **Обработку HTTP запросов** к API endpoints (`/api/wallets/.../operation/`, `/api/wallets/{WALLET_UUID}/`, `/api/register/`).
+        > *   **Обработку HTTP запросов** к API endpoints (`/api/v1/wallets/.../operation/`, `/api/v1/wallets/{WALLET_UUID}/`, `/api/v1/register/`).
         > *   **Маршрутизацию запросов** к соответствующим вьюхам (`WalletOperation`, `WalletDetail`, `UserRegistration`).
         > *   **Сериализацию и десериализацию данных** (преобразование JSON данных запросов в Python объекты и обратно в JSON ответы) с использованием сериализаторов (`WalletOperationSerializer`, `WalletSerializer`, `UserRegistrationSerializer`).
         > *   **Валидацию входных данных** с помощью сериализаторов для обеспечения корректности запросов API.
@@ -70,7 +70,7 @@
         > Выполняет роль reverse proxy и сервера статических файлов перед Gunicorn и Django приложением. Nginx обеспечивает:
         >
         > *   **Прием входящих HTTP запросов от клиентов** (Postman, браузер).
-        > *   **Проксирование API запросов** (`/api/wallets/.../operation/`, `/api/wallets/{WALLET_UUID}/`, `/api/register/`) к бэкенд серверу Gunicorn (на порт 8000).
+        > *   **Проксирование API запросов** (`/api/v1/wallets/.../operation/`, `/api/v1/wallets/{WALLET_UUID}/`, `/api/v1/register/`) к бэкенд серверу Gunicorn (на порт 8000).
         > *   **Раздачу статических файлов Django Admin панели** (CSS, JavaScript, изображения) из директории `/app/staticfiles/` (смонтированного Docker volume `static_volume`).  Настроено раздачу статики из блока `location /static/` в `nginx.conf`.
         > *   **Логирование запросов и ошибок Nginx.**
         > *   **Слушает на порту 8080** и проксирует запросы к Gunicorn на порт 8000.
@@ -97,9 +97,9 @@
 
 ## 3. Описание API Endpoints
 
-*   **`POST /api/register/` (User Registration):**
+*   **`POST /api/v1/register/` (User Registration):**
 
-    *   **URL:** `/api/register/`
+    *   **URL:** `/api/v1/register/`
     *   **HTTP метод:** `POST`
     *   **Описание:** Регистрация нового пользователя и создание для него кошелька.
 
@@ -160,9 +160,9 @@
         > }
         > ```
 
-*   **`GET /api/wallets/{WALLET_UUID}/` (Wallet Detail):**
+*   **`GET /api/v1/wallets/{WALLET_UUID}/` (Wallet Detail):**
 
-    *   **URL:** `/api/wallets/{WALLET_UUID}/`
+    *   **URL:** `/api/v1/wallets/{WALLET_UUID}/`
     *   **HTTP метод:** `GET`
     *   **Описание:** Получение информации о кошельке по его UUID.
 
@@ -201,9 +201,9 @@
         > }
         > ```
 
-*   **`POST /api/wallets/{WALLET_UUID}/operation/` (Wallet Operation):**
+*   **`POST /api/v1/wallets/{WALLET_UUID}/operation/` (Wallet Operation):**
 
-    *   **URL:** `/api/wallets/{WALLET_UUID}/operation/`
+    *   **URL:** `/api/v1/wallets/{WALLET_UUID}/operation/`
     *   **HTTP метод:** `POST`
     *   **Описание:** Выполнение операции пополнения (DEPOSIT) или снятия (WITHDRAW) средств с кошелька.
 
@@ -370,7 +370,7 @@
         >
         > *   Отображает *текущий баланс кошелька*, связанного с пользователем.
         > *   Хранится в базе данных как `DecimalField` с максимальной точностью `max_digits=12` и `decimal_places=2`.
-        > *   **Поле *только для чтения (readOnly: true)* - значение баланса *нельзя изменить* напрямую через API при регистрации пользователя.**  Баланс устанавливается в `"0.00"` автоматически при создании кошелька.  Для изменения баланса используются *операции пополнения и снятия средств* (API endpoint `POST /api/wallets/{WALLET_UUID}/operation/`).
+        > *   **Поле *только для чтения (readOnly: true)* - значение баланса *нельзя изменить* напрямую через API при регистрации пользователя.**  Баланс устанавливается в `"0.00"` автоматически при создании кошелька.  Для изменения баланса используются *операции пополнения и снятия средств* (API endpoint `POST /api/v1/wallets/{WALLET_UUID}/operation/`).
         > *   **Тип поля в Django REST Framework:** `serializers.DecimalField(source='wallet.balance', max_digits=10, decimal_places=2, read_only=True)`.
         > *   **Пример значения:** `"0.00"`.
 
@@ -378,7 +378,7 @@
 
     > **Название сериализатора:** `WalletSerializer`
     >
-    > **Описание сериализатора:**  Используется для сериализации данных модели `Wallet` при получении детальной информации о кошельке (API endpoint `GET /api/wallets/{WALLET_UUID}/`).
+    > **Описание сериализатора:**  Используется для сериализации данных модели `Wallet` при получении детальной информации о кошельке (API endpoint `GET /api/v1/wallets/{WALLET_UUID}/`).
     >
     > **Поля сериализатора:**
     >
@@ -395,7 +395,7 @@
         >
         > *   Отображает *текущий баланс кошелька*.
         > *   Хранится в базе данных как `DecimalField` с максимальной точностью `max_digits=12` и `decimal_places=2`.
-        > *   **Поле только для чтения (readOnly: true) - значение баланса *изменяется только* в результате выполнения операций пополнения и снятия средств** (API endpoint `POST /api/wallets/{WALLET_UUID}/operation/`).
+        > *   **Поле только для чтения (readOnly: true) - значение баланса *изменяется только* в результате выполнения операций пополнения и снятия средств** (API endpoint `POST /api/v1/wallets/{WALLET_UUID}/operation/`).
         > *   **Тип поля в Django REST Framework:** `serializers.ModelSerializer` (унаследовано от модели `Wallet`).
         > *   **Пример значения:** `"1200.50"`.
 
@@ -403,7 +403,7 @@
 
     > **Название сериализатора:** `WalletOperationSerializer`
     >
-    > **Описание сериализатора:**  Используется для валидации данных запроса к API endpoint `POST /api/wallets/{WALLET_UUID}/operation/` при выполнении операций пополнения (DEPOSIT) и снятия (WITHDRAW) средств с кошелька.
+    > **Описание сериализатора:**  Используется для валидации данных запроса к API endpoint `POST /api/v1/wallets/{WALLET_UUID}/operation/` при выполнении операций пополнения (DEPOSIT) и снятия (WITHDRAW) средств с кошелька.
     >
     > **Поля сериализатора:**
     >
