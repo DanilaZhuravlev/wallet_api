@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             gunicorn --worker-class=gevent --workers=16 --bind 0.0.0.0:8000 wallet_final.wsgi:application --log-level=debug"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles
+    depends_on:
+      - web
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: wallet_admin
+      POSTGRES_PASSWORD: Privetbro94
+      POSTGRES_DB: wallet_db1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+  static_volume:
