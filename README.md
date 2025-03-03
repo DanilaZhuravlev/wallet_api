@@ -41,7 +41,7 @@ docker-compose up --build
 ```
 После запуска API будет доступно по:
 - **Админ-панель:** `http://localhost:8080/admin/`
-- **API Endpoints:** `http://localhost:8080/api/`
+- **API Endpoints:** `http://localhost:8080/api/v1/`
 
 ## ✅ Тестирование
 Запустите тесты в контейнере:
