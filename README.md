@@ -31,7 +31,7 @@ API предоставляет:
 
 ### 2️⃣ Клонируйте репозиторий
 ```bash
-git clone <URL вашего репозитория GitHub>
+git clone https://github.com/DanilaZhuravlev/wallet_api
 cd wallet_final
 ```
 
